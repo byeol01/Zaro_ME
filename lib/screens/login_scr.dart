@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zaro_me_app/services/auth_service.dart';
 import 'home_scr.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -9,19 +10,31 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final AuthService _authService = AuthService();
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _login() {
-    // 간단한 로그인 로직 (실제로는 서버와 통신해야 함)
-    if (_idController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+  void _login() async {
+    final email = _idController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요')),
+      );
+      return;
+    }
+
+    final userCredential = await _authService.signInWithEmailAndPassword(email, password);
+
+    if (userCredential != null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요')),
+        const SnackBar(content: Text('로그인에 실패했습니다. 아이디 또는 비밀번호를 확인하세요.')),
       );
     }
   }
@@ -151,7 +164,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontSize: 14,
                     )),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                        );
+                      },
                       child: const Text(
                         '회원가입',
                         style: TextStyle(
