@@ -37,8 +37,9 @@ dependencies:
   
   # 위치 서비스 패키지
   geolocator: ^10.1.0
-  firebase_core: ^4.1.1
-  firebase_auth: ^6.1.0
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  firebase_app_check: ^0.2.2+1
 
 dev_dependencies:
   flutter_test:

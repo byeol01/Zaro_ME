@@ -59,7 +59,6 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
           children: [
             const SizedBox(height: 40),
             
-            // 활동 아이콘
             Container(
               width: 120,
               height: 120,
@@ -80,7 +79,6 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
             
             const SizedBox(height: 30),
             
-            // 활동 제목
             Text(
               widget.activityTitle,
               style: const TextStyle(
@@ -92,7 +90,6 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
             
             const SizedBox(height: 40),
             
-            // 개수 선택
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -160,7 +157,6 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
             
             const SizedBox(height: 30),
             
-            // 메모 입력
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -207,7 +203,6 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
             
             const Spacer(),
             
-            // 저장 버튼
             SizedBox(
               width: double.infinity,
               height: 56,

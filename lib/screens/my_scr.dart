@@ -26,7 +26,6 @@ class _MyScreenState extends State<MyScreen> {
     setState(() {
       currentLevel = newLevel;
     });
-    // 홈 화면으로 변경된 레벨 전달
     Navigator.pop(context, newLevel);
   }
 
@@ -40,7 +39,6 @@ class _MyScreenState extends State<MyScreen> {
       appBar: CustomHeader(
         userLevel: currentLevel,
         onProfileTap: () {
-          // 프로필 클릭 시 아무 동작 없음 (이미 마이페이지에 있음)
         },
         onLogoTap: _navigateToHome,
       ),
@@ -50,7 +48,6 @@ class _MyScreenState extends State<MyScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            // 프로필 이미지
             Container(
               width: 120,
               height: 120,
@@ -69,7 +66,6 @@ class _MyScreenState extends State<MyScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // 사용자 레벨 표시
             Text(
               'Level $currentLevel',
               style: const TextStyle(
@@ -87,7 +83,6 @@ class _MyScreenState extends State<MyScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            // 레벨 변경 버튼들 (테스트용)
             const Text(
               '레벨 테스트 (개발용)',
               style: TextStyle(
@@ -112,7 +107,6 @@ class _MyScreenState extends State<MyScreen> {
               }),
             ),
             const SizedBox(height: 40),
-            // 사용자 정보 섹션
             _buildInfoCard(
               '개인정보',
               [

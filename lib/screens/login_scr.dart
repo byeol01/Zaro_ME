@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zaro_me_app/services/auth_service.dart';
 import 'home_scr.dart';
+import 'signup_scr.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,20 +42,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 화면 사이즈 정보를 가져옵니다.
     final screenSize = MediaQuery.of(context).size;
     
-    // 모바일 앱에 최적화된 크기 설정
-    final horizontalPadding = 24.0; // 모바일 앱에 적합한 패딩
-    final logoSize = 0.5; // 모바일 앱에 적합한 로고 크기
+    final horizontalPadding = 24.0;
+    final logoSize = 0.5;
 
     return Scaffold(
       body: SafeArea(
-        // SingleChildScrollView로 감싸서 스크롤 가능하게 만듭니다.
-        // 화면이 작은 기기에서 키보드가 올라올 때 UI가 가려지는 것을 방지합니다.
         child: SingleChildScrollView(
           child: Container(
-            // 정렬을 위해 화면 전체 높이만큼 최소 높이를 확보합니다.
             constraints: BoxConstraints(
               minHeight: screenSize.height - MediaQuery.of(context).padding.top,
             ),
@@ -62,15 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 1. 로고 섹션 (모바일 앱 최적화)
                 Image.asset(
                   'assets/images/logo.png',
-                  // 모바일 앱에 적합한 로고 크기
                   width: screenSize.width * logoSize,
                 ),
                 const SizedBox(height: 40),
 
-                // 2. 아이디/비밀번호 입력창 섹션 (모바일 앱 최적화)
                 TextField(
                   controller: _idController,
                   decoration: const InputDecoration(
@@ -79,25 +72,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     fillColor: Colors.white,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 16, // 모바일 앱에 적합한 터치 영역
+                      vertical: 16,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                      borderSide: BorderSide.none, // 테두리 없음
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true, // 비밀번호 가리기
+                  obscureText: true,
                   decoration: const InputDecoration(
                     hintText: '비밀번호 입력',
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 16, // 모바일 앱에 적합한 터치 영역
+                      vertical: 16,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30.0)),
@@ -107,10 +100,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // 로그인 버튼 (모바일 앱 최적화)
                 SizedBox(
                   width: double.infinity,
-                  height: 52, // 모바일 앱에 적합한 터치 영역
+                  height: 52,
                   child: ElevatedButton(
                     onPressed: _login,
                     style: ElevatedButton.styleFrom(
@@ -131,7 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 3. 아이디찾기/비밀번호찾기/회원가입 링크 섹션 (모바일 앱 최적화)
                 Wrap(
                   alignment: WrapAlignment.center,
                   children: [
@@ -182,7 +173,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // 4. SNS 간편로그인 섹션 (모바일 앱 최적화)
                 const Text(
                   '--------- SNS 간편로그인 ---------',
                   style: TextStyle(
@@ -198,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () {},
                       child: Image.asset(
                         'assets/images/naver.png', 
-                        width: 48, // 모바일 앱에 적합한 터치 영역
+                        width: 48,
                       ),
                     ),
                     const SizedBox(width: 20),
@@ -206,7 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () {},
                       child: Image.asset(
                         'assets/images/kakao.png', 
-                        width: 48, // 모바일 앱에 적합한 터치 영역
+                        width: 48,
                       ),
                     ),
                     const SizedBox(width: 20),
@@ -214,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onTap: () {},
                       child: Image.asset(
                         'assets/images/google.png', 
-                        width: 48, // 모바일 앱에 적합한 터치 영역
+                        width: 48,
                       ),
                     ),
                   ],

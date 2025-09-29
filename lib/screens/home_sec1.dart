@@ -15,17 +15,16 @@ class _HomeSec1State extends State<HomeSec1> {
   bool _isLocationAuthenticated = false;
   String _localRanking = "";
   String _contribution = "";
-  late final EcoActivityData _activityData; // late로 변경
+  late final EcoActivityData _activityData;
   
   @override
   void initState() {
     super.initState();
-    _activityData = EcoActivityData(); // initState에서 초기화
+    _activityData = EcoActivityData();
   }
 
   void _authenticateLocation() async {
     try {
-      // 위치 권한 확인
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -44,12 +43,10 @@ class _HomeSec1State extends State<HomeSec1> {
         return;
       }
 
-      // 현재 위치 가져오기
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // 위치 기반 지역 인증
       String location = _getLocationFromCoordinates(position.latitude, position.longitude);
       
       setState(() {
@@ -59,11 +56,6 @@ class _HomeSec1State extends State<HomeSec1> {
         _contribution = "상위 12%";
       });
 
-      // 지역인증 완료 시 스낵바 제거 (UI에서만 표시)
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('$location 지역인증이 완료되었습니다!')),
-      // );
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('위치를 가져올 수 없습니다: $e')),
@@ -72,7 +64,6 @@ class _HomeSec1State extends State<HomeSec1> {
   }
 
   String _getLocationFromCoordinates(double lat, double lng) {
-    // 간단한 지역 매핑 (실제로는 더 정확한 지오코딩 서비스 사용)
     if (lat >= 37.4 && lat <= 37.6 && lng >= 126.8 && lng <= 127.0) {
       return "금천구";
     } else if (lat >= 37.5 && lat <= 37.6 && lng >= 127.0 && lng <= 127.1) {
@@ -94,12 +85,10 @@ class _HomeSec1State extends State<HomeSec1> {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          // 말풍선과 캐릭터
           SizedBox(
             height: 320,
             child: Stack(
               children: [
-                // 말풍선 (지역인증 전에만 표시)
                 if (!_isLocationAuthenticated)
                   Positioned(
                     top: 0,
@@ -130,7 +119,6 @@ class _HomeSec1State extends State<HomeSec1> {
                       ),
                     ),
                   ),
-                // 지역랭킹과 기여도 (이미지와 상단 사이)
                 if (_isLocationAuthenticated)
                   Positioned(
                     top: 20,
@@ -153,7 +141,6 @@ class _HomeSec1State extends State<HomeSec1> {
                       ),
                     ),
                   ),
-                // 캐릭터 이미지
                 Positioned(
                   top: 90,
                   left: 0,
@@ -188,7 +175,6 @@ class _HomeSec1State extends State<HomeSec1> {
           
           const SizedBox(height: 50),
           
-          // 통계 카드
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -224,9 +210,8 @@ class _HomeSec1State extends State<HomeSec1> {
           
           const SizedBox(height: 30),
           
-          // 기록하기 섹션 - 작은 박스와 같은 위치로 조정
           Padding(
-            padding: const EdgeInsets.only(left: 20), // 작은 박스와 같은 위치
+            padding: const EdgeInsets.only(left: 20),
             child: const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -241,10 +226,8 @@ class _HomeSec1State extends State<HomeSec1> {
           ),
           const SizedBox(height: 20),
           
-          // 4개 카드 (2x2 그리드) - 중앙 정렬
           Column(
             children: [
-              // 첫 번째 줄 - 중앙 정렬
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -262,7 +245,6 @@ class _HomeSec1State extends State<HomeSec1> {
                 ],
               ),
               const SizedBox(height: 16),
-              // 두 번째 줄 - 중앙 정렬
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -335,7 +317,7 @@ class _HomeSec1State extends State<HomeSec1> {
     try {
       return _activityData.activityCounts[type] ?? 0;
     } catch (e) {
-      return 0; // 오류 발생 시 0 반환
+      return 0;
     }
   }
 
@@ -365,8 +347,8 @@ class _HomeSec1State extends State<HomeSec1> {
     return GestureDetector(
       onTap: () => _navigateToRecordPage(type, title),
       child: Container(
-        width: 180, // 너비 더 증가
-        height: 140, // 높이 더 증가
+        width: 180,
+        height: 140,
         decoration: BoxDecoration(
           color: const Color(0xFFE8F5E8),
           borderRadius: BorderRadius.circular(16),
@@ -376,10 +358,9 @@ class _HomeSec1State extends State<HomeSec1> {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(30), // 30px 패딩
+          padding: const EdgeInsets.all(30),
           child: Column(
             children: [
-              // 상단: 아이콘과 + 버튼
               Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -405,7 +386,6 @@ class _HomeSec1State extends State<HomeSec1> {
                   ],
                 ),
               ),
-              // 하단: 텍스트 (왼쪽 정렬)
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -435,8 +415,8 @@ class _HomeSec1State extends State<HomeSec1> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 80, // 70에서 80으로 증가
-        height: 90, // 80에서 90으로 증가
+        width: 80,
+        height: 90,
         decoration: BoxDecoration(
           color: const Color(0xFFE8F5E8),
           borderRadius: BorderRadius.circular(12),
@@ -450,7 +430,7 @@ class _HomeSec1State extends State<HomeSec1> {
           children: [
             Icon(
               icon,
-              size: 28, // 24에서 28로 증가
+              size: 28,
               color: color,
             ),
             const SizedBox(height: 8),
@@ -463,7 +443,7 @@ class _HomeSec1State extends State<HomeSec1> {
             Text(
               value,
               style: TextStyle(
-                fontSize: 13, // 12에서 13으로 증가
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: color,
               ),
@@ -474,4 +454,3 @@ class _HomeSec1State extends State<HomeSec1> {
     );
   }
 }
-

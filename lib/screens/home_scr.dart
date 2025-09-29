@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  int _userLevel = 1; // 사용자 레벨 상태
+  int _userLevel = 1;
 
   void _onTabTapped(int index) {
     setState(() {
@@ -30,7 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     ).then((result) {
-      // 마이페이지에서 레벨이 변경되었을 경우 업데이트
       if (result != null && result is int) {
         setState(() {
           _userLevel = result;
@@ -40,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToHome() {
-    // 현재 탭을 홈 탭으로 변경
     setState(() {
       _currentIndex = 0;
     });
