@@ -60,6 +60,21 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _signInWithKakao() async {
+    final userCredential = await _authService.signInWithKakao();
+    if (!mounted) return;
+    if (userCredential != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('카카오 로그인에 실패했습니다. 다시 시도해주세요.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -83,7 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: screenSize.width * logoSize,
                 ),
                 const SizedBox(height: 40),
-
                 TextField(
                   controller: _idController,
                   decoration: const InputDecoration(
@@ -119,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -142,7 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -198,7 +210,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
                 const SizedBox(height: 32),
-
                 const Text(
                   '--------- SNS 간편로그인 ---------',
                   style: TextStyle(color: Colors.black54, fontSize: 14),
@@ -213,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(width: 20),
                     InkWell(
-                      onTap: () {},
+                      onTap: _signInWithKakao,
                       child: Image.asset('assets/images/kakao.png', width: 48),
                     ),
                     const SizedBox(width: 20),
