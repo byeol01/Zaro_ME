@@ -20,14 +20,19 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요')),
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요')));
       return;
     }
 
-    final userCredential = await _authService.signInWithEmailAndPassword(email, password);
+    final userCredential = await _authService.signInWithEmailAndPassword(
+      email,
+      password,
+    );
 
+    if (!mounted) return;
     if (userCredential != null) {
       Navigator.pushReplacement(
         context,
@@ -40,10 +45,25 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _signInWithGoogle() async {
+    final userCredential = await _authService.signInWithGoogle();
+    if (!mounted) return;
+    if (userCredential != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('구글 로그인에 실패했습니다. 다시 시도해주세요.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    
+
     final horizontalPadding = 24.0;
     final logoSize = 0.5;
 
@@ -123,50 +143,56 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                Wrap(
-                  alignment: WrapAlignment.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     TextButton(
                       onPressed: () {},
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        minimumSize: Size.zero,
+                      ),
                       child: const Text(
                         '아이디찾기',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
                       ),
                     ),
-                    const Text('|', style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    )),
+                    const Text(
+                      '|',
+                      style: TextStyle(color: Colors.black54, fontSize: 14),
+                    ),
                     TextButton(
                       onPressed: () {},
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        minimumSize: Size.zero,
+                      ),
                       child: const Text(
                         '비밀번호 찾기',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
                       ),
                     ),
-                    const Text('|', style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    )),
+                    const Text(
+                      '|',
+                      style: TextStyle(color: Colors.black54, fontSize: 14),
+                    ),
                     TextButton(
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpScreen(),
+                          ),
                         );
                       },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        minimumSize: Size.zero,
+                      ),
                       child: const Text(
                         '회원가입',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
                       ),
                     ),
                   ],
@@ -175,10 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const Text(
                   '--------- SNS 간편로그인 ---------',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -186,26 +209,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     InkWell(
                       onTap: () {},
-                      child: Image.asset(
-                        'assets/images/naver.png', 
-                        width: 48,
-                      ),
+                      child: Image.asset('assets/images/naver.png', width: 48),
                     ),
                     const SizedBox(width: 20),
                     InkWell(
                       onTap: () {},
-                      child: Image.asset(
-                        'assets/images/kakao.png', 
-                        width: 48,
-                      ),
+                      child: Image.asset('assets/images/kakao.png', width: 48),
                     ),
                     const SizedBox(width: 20),
                     InkWell(
-                      onTap: () {},
-                      child: Image.asset(
-                        'assets/images/google.png', 
-                        width: 48,
-                      ),
+                      onTap: _signInWithGoogle,
+                      child: Image.asset('assets/images/google.png', width: 48),
                     ),
                   ],
                 ),
