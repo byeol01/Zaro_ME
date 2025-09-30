@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
@@ -9,19 +10,58 @@ import 'screens/login_scr.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
-
-  final kakaoAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'];
-  if (kakaoAppKey != null) {
-    KakaoSdk.init(nativeAppKey: kakaoAppKey);
-  } else {
-    print("FATAL: KAKAO_NATIVE_APP_KEY not found in .env file");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    print("Warning: Could not load .env file: $e");
   }
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.playIntegrity,
-  );
+  try {
+    if (kIsWeb) {
+      final kakaoJavaScriptKey = dotenv.env['KAKAO_JAVASCRIPT_KEY'] ?? '';
+      if (kakaoJavaScriptKey.isNotEmpty) {
+        KakaoSdk.init(javaScriptAppKey: kakaoJavaScriptKey);
+      } else {
+        print("Warning: KAKAO_JAVASCRIPT_KEY not found in .env");
+      }
+    } else {
+      final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? '';
+      if (kakaoNativeAppKey.isNotEmpty) {
+        KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
+      } else {
+        print("Warning: KAKAO_NATIVE_APP_KEY not found in .env");
+      }
+    }
+  } catch (e) {
+    print("Warning: Failed to initialize Kakao SDK: $e");
+  }
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print("Firebase initialized successfully");
+  } catch (e) {
+    print("Error initializing Firebase: $e");
+  }
+
+  try {
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      await FirebaseAppCheck.instance.activate(
+        androidProvider: AndroidProvider.playIntegrity,
+      );
+      print("Firebase App Check (Android) initialized successfully");
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      await FirebaseAppCheck.instance.activate(
+        appleProvider: AppleProvider.appAttest,
+      );
+      print("Firebase App Check (iOS) initialized successfully");
+    } else {
+      print("Firebase App Check skipped for web/desktop platform");
+    }
+  } catch (e) {
+    print("Warning: Failed to initialize Firebase App Check: $e");
+  }
 
   runApp(const ZeroMeApp());
 }

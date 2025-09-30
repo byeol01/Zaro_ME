@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
@@ -71,7 +72,8 @@ class AuthService {
         throw Exception('Kakao ID token is null');
       }
 
-      final provider = OAuthProvider('oidc.kakao');
+      final providerId = kIsWeb ? 'oidc.kakao2' : 'oidc.kakao';
+      final provider = OAuthProvider(providerId);
       final credential = provider.credential(idToken: idToken);
 
       return await _auth.signInWithCredential(credential);
