@@ -15,7 +15,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: const Color.fromARGB(255, 255, 255, 255), // 연한 라임색 배경
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       foregroundColor: Colors.white,
       elevation: 0,
       leading: GestureDetector(
@@ -34,7 +34,7 @@ class CustomHeader extends StatelessWidget implements PreferredSizeWidget {
               'Zaro_ME',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2E7D32), // 진한 녹색 글자
+                color: Color(0xFF2E7D32),
                 fontSize: 18,
                 
               ),

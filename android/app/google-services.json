@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "468919974199",
+    "project_id": "zerome",
+    "storage_bucket": "zerome.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468919974199:android:3220c3cf0f470f394e82b2",
+        "android_client_info": {
+          "package_name": "com.example.zaro_me_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "468919974199-ojsohi845g78lvu7g61rcm2263r0rtqd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.zaro_me_app",
+            "certificate_hash": "f41720b7410181be7afb1c08dcd138e8a1437491"
+          }
+        },
+        {
+          "client_id": "468919974199-6ghdt36ihco529rrkt3bf28q85e4qk9f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjKxK7rIK7VYqlZDxxfCAFff02nHdvobQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "468919974199-6ghdt36ihco529rrkt3bf28q85e4qk9f.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "468919974199-131mvsnsop34oojr2m7qkgm9jvrb4shq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zaroMeApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

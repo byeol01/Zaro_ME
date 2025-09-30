@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:zaro_me_app/services/auth_service.dart';
 import 'home_scr.dart';
+import 'signup_scr.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,39 +11,81 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final AuthService _authService = AuthService();
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  void _login() {
-    // 간단한 로그인 로직 (실제로는 서버와 통신해야 함)
-    if (_idController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+  void _login() async {
+    final email = _idController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요')));
+      return;
+    }
+
+    final userCredential = await _authService.signInWithEmailAndPassword(
+      email,
+      password,
+    );
+
+    if (!mounted) return;
+    if (userCredential != null) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('아이디와 비밀번호를 입력해주세요')),
+        const SnackBar(content: Text('로그인에 실패했습니다. 아이디 또는 비밀번호를 확인하세요.')),
+      );
+    }
+  }
+
+  void _signInWithGoogle() async {
+    final userCredential = await _authService.signInWithGoogle();
+    if (!mounted) return;
+    if (userCredential != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('구글 로그인에 실패했습니다. 다시 시도해주세요.')),
+      );
+    }
+  }
+
+  void _signInWithKakao() async {
+    final userCredential = await _authService.signInWithKakao();
+    if (!mounted) return;
+    if (userCredential != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('카카오 로그인에 실패했습니다. 다시 시도해주세요.')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 화면 사이즈 정보를 가져옵니다.
     final screenSize = MediaQuery.of(context).size;
-    
-    // 모바일 앱에 최적화된 크기 설정
-    final horizontalPadding = 24.0; // 모바일 앱에 적합한 패딩
-    final logoSize = 0.5; // 모바일 앱에 적합한 로고 크기
+
+    final horizontalPadding = 24.0;
+    final logoSize = 0.5;
 
     return Scaffold(
       body: SafeArea(
-        // SingleChildScrollView로 감싸서 스크롤 가능하게 만듭니다.
-        // 화면이 작은 기기에서 키보드가 올라올 때 UI가 가려지는 것을 방지합니다.
         child: SingleChildScrollView(
           child: Container(
-            // 정렬을 위해 화면 전체 높이만큼 최소 높이를 확보합니다.
             constraints: BoxConstraints(
               minHeight: screenSize.height - MediaQuery.of(context).padding.top,
             ),
@@ -49,15 +93,11 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 1. 로고 섹션 (모바일 앱 최적화)
                 Image.asset(
                   'assets/images/logo.png',
-                  // 모바일 앱에 적합한 로고 크기
                   width: screenSize.width * logoSize,
                 ),
                 const SizedBox(height: 40),
-
-                // 2. 아이디/비밀번호 입력창 섹션 (모바일 앱 최적화)
                 TextField(
                   controller: _idController,
                   decoration: const InputDecoration(
@@ -66,25 +106,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     fillColor: Colors.white,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 16, // 모바일 앱에 적합한 터치 영역
+                      vertical: 16,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                      borderSide: BorderSide.none, // 테두리 없음
+                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true, // 비밀번호 가리기
+                  obscureText: true,
                   decoration: const InputDecoration(
                     hintText: '비밀번호 입력',
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 16, // 모바일 앱에 적합한 터치 영역
+                      vertical: 16,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(30.0)),
@@ -93,11 +133,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-
-                // 로그인 버튼 (모바일 앱 최적화)
                 SizedBox(
                   width: double.infinity,
-                  height: 52, // 모바일 앱에 적합한 터치 영역
+                  height: 52,
                   child: ElevatedButton(
                     onPressed: _login,
                     style: ElevatedButton.styleFrom(
@@ -117,60 +155,64 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // 3. 아이디찾기/비밀번호찾기/회원가입 링크 섹션 (모바일 앱 최적화)
-                Wrap(
-                  alignment: WrapAlignment.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     TextButton(
                       onPressed: () {},
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        minimumSize: Size.zero,
+                      ),
                       child: const Text(
                         '아이디찾기',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
                       ),
                     ),
-                    const Text('|', style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    )),
+                    const Text(
+                      '|',
+                      style: TextStyle(color: Colors.black54, fontSize: 14),
+                    ),
                     TextButton(
                       onPressed: () {},
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        minimumSize: Size.zero,
+                      ),
                       child: const Text(
                         '비밀번호 찾기',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
                       ),
                     ),
-                    const Text('|', style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 14,
-                    )),
+                    const Text(
+                      '|',
+                      style: TextStyle(color: Colors.black54, fontSize: 14),
+                    ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpScreen(),
+                          ),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        minimumSize: Size.zero,
+                      ),
                       child: const Text(
                         '회원가입',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.black54, fontSize: 14),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 32),
-
-                // 4. SNS 간편로그인 섹션 (모바일 앱 최적화)
                 const Text(
                   '--------- SNS 간편로그인 ---------',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.black54, fontSize: 14),
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -178,26 +220,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     InkWell(
                       onTap: () {},
-                      child: Image.asset(
-                        'assets/images/naver.png', 
-                        width: 48, // 모바일 앱에 적합한 터치 영역
-                      ),
+                      child: Image.asset('assets/images/naver.png', width: 48),
                     ),
                     const SizedBox(width: 20),
                     InkWell(
-                      onTap: () {},
-                      child: Image.asset(
-                        'assets/images/kakao.png', 
-                        width: 48, // 모바일 앱에 적합한 터치 영역
-                      ),
+                      onTap: _signInWithKakao,
+                      child: Image.asset('assets/images/kakao.png', width: 48),
                     ),
                     const SizedBox(width: 20),
                     InkWell(
-                      onTap: () {},
-                      child: Image.asset(
-                        'assets/images/google.png', 
-                        width: 48, // 모바일 앱에 적합한 터치 영역
-                      ),
+                      onTap: _signInWithGoogle,
+                      child: Image.asset('assets/images/google.png', width: 48),
                     ),
                   ],
                 ),
