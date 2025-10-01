@@ -28,9 +28,9 @@ class CustomBottomNav extends StatelessWidget {
           label: '홈',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.search_outlined),
-          activeIcon: Icon(Icons.search),
-          label: '검색',
+          icon: Icon(Icons.map_outlined),
+          activeIcon: Icon(Icons.map),
+          label: '지도',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),

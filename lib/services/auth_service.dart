@@ -140,4 +140,15 @@ class AuthService {
       return null;
     }
   }
+
+  Future<void> signOut() async {
+    try {
+      await _googleSignIn.signOut();
+      await kakao.UserApi.instance.logout();
+      await NaverLoginSDK.logout();
+    } catch (e) {
+      print("Error signing out from social providers: $e");
+    }
+    await _auth.signOut();
+  }
 }

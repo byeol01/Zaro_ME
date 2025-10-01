@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'screens/login_scr.dart';
+import 'screens/home_scr.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,14 +23,14 @@ void main() async {
     if (kIsWeb) {
       final kakaoJavaScriptKey = dotenv.env['KAKAO_JAVASCRIPT_KEY'] ?? '';
       if (kakaoJavaScriptKey.isNotEmpty) {
-        KakaoSdk.init(javaScriptAppKey: kakaoJavaScriptKey);
+        kakao.KakaoSdk.init(javaScriptAppKey: kakaoJavaScriptKey);
       } else {
         print("Warning: KAKAO_JAVASCRIPT_KEY not found in .env");
       }
     } else {
       final kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? '';
       if (kakaoNativeAppKey.isNotEmpty) {
-        KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
+        kakao.KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
       } else {
         print("Warning: KAKAO_NATIVE_APP_KEY not found in .env");
       }
@@ -89,7 +91,29 @@ class ZeroMeApp extends StatelessWidget {
         primarySwatch: Colors.green,
         scaffoldBackgroundColor: const Color(0xFFF0F4C3),
       ),
-      home: const LoginScreen(),
+      home: const AuthWrapper(),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.hasData) {
+          return const HomeScreen();
+        }
+        return const LoginScreen();
+      },
     );
   }
 }

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:zaro_me_app/services/auth_service.dart';
+import 'package:zaro_me_app/screens/login_scr.dart';
 import '../components/header.dart';
 
 class MyScreen extends StatefulWidget {
   final int userLevel;
-  
-  const MyScreen({
-    super.key,
-    this.userLevel = 1,
-  });
+
+  const MyScreen({super.key, this.userLevel = 1});
 
   @override
   State<MyScreen> createState() => _MyScreenState();
@@ -15,6 +14,7 @@ class MyScreen extends StatefulWidget {
 
 class _MyScreenState extends State<MyScreen> {
   late int currentLevel;
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -33,13 +33,22 @@ class _MyScreenState extends State<MyScreen> {
     Navigator.pop(context);
   }
 
+  void _signOut() async {
+    await _authService.signOut();
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (Route<dynamic> route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomHeader(
         userLevel: currentLevel,
-        onProfileTap: () {
-        },
+        onProfileTap: () {},
         onLogoTap: _navigateToHome,
       ),
       body: SingleChildScrollView(
@@ -53,10 +62,7 @@ class _MyScreenState extends State<MyScreen> {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.green,
-                  width: 3,
-                ),
+                border: Border.all(color: Colors.green, width: 3),
               ),
               child: ClipOval(
                 child: Image.asset(
@@ -77,18 +83,40 @@ class _MyScreenState extends State<MyScreen> {
             const SizedBox(height: 10),
             Text(
               '환경 기여도 레벨',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 40),
+            _buildInfoCard('개인정보', [
+              '이름: 사용자',
+              '이메일: user@example.com',
+              '가입일: 2024.01.01',
+            ]),
+            const SizedBox(height: 20),
+            _buildInfoCard('환경 기여 통계', [
+              '총 기여 포인트: ${currentLevel * 100}',
+              '리사이클링 횟수: ${currentLevel * 5}',
+              '탄소 절약량: ${currentLevel * 2.5}kg',
+            ]),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: _signOut,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[600],
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 50,
+                  vertical: 15,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
               ),
+              child: const Text('로그아웃'),
             ),
             const SizedBox(height: 40),
             const Text(
               '레벨 테스트 (개발용)',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Wrap(
@@ -99,30 +127,16 @@ class _MyScreenState extends State<MyScreen> {
                 return ElevatedButton(
                   onPressed: () => _updateLevel(level),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: currentLevel == level ? Colors.green : Colors.grey[300],
-                    foregroundColor: currentLevel == level ? Colors.white : Colors.black,
+                    backgroundColor: currentLevel == level
+                        ? Colors.green
+                        : Colors.grey[300],
+                    foregroundColor: currentLevel == level
+                        ? Colors.white
+                        : Colors.black,
                   ),
                   child: Text('Lv.$level'),
                 );
               }),
-            ),
-            const SizedBox(height: 40),
-            _buildInfoCard(
-              '개인정보',
-              [
-                '이름: 사용자',
-                '이메일: user@example.com',
-                '가입일: 2024.01.01',
-              ],
-            ),
-            const SizedBox(height: 20),
-            _buildInfoCard(
-              '환경 기여 통계',
-              [
-                '총 기여 포인트: ${currentLevel * 100}',
-                '리사이클링 횟수: ${currentLevel * 5}',
-                '탄소 절약량: ${currentLevel * 2.5}kg',
-              ],
             ),
           ],
         ),
@@ -147,13 +161,12 @@ class _MyScreenState extends State<MyScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            ...items.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                item,
-                style: const TextStyle(fontSize: 14),
+            ...items.map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(item, style: const TextStyle(fontSize: 14)),
               ),
-            )),
+            ),
           ],
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../components/header.dart';
 import '../components/bottom_nav.dart';
 import 'my_scr.dart';
@@ -15,6 +16,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   int _userLevel = 1;
 
+  static const CameraPosition _seoulCityHall = CameraPosition(
+    target: LatLng(37.5665, 126.9780),
+    zoom: 15.0,
+  );
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -24,11 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _navigateToMyPage() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => MyScreen(
-          userLevel: _userLevel,
-        ),
-      ),
+      MaterialPageRoute(builder: (context) => MyScreen(userLevel: _userLevel)),
     ).then((result) {
       if (result != null && result is int) {
         setState(() {
@@ -74,44 +76,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeContent() {
-    return const SingleChildScrollView(
-      child: Column(
-        children: [
-          HomeSec1(),
-        ],
-      ),
-    );
+    return const SingleChildScrollView(child: Column(children: [HomeSec1()]));
   }
 
   Widget _buildSearchContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search,
-            size: 100,
-            color: Colors.green,
-          ),
-          SizedBox(height: 20),
-          Text(
-            '검색 화면',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            '검색 기능이 여기에 들어갑니다.',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black54,
-            ),
-          ),
-        ],
-      ),
+    return const GoogleMap(
+      mapType: MapType.normal,
+      initialCameraPosition: _seoulCityHall,
     );
   }
 
@@ -120,11 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.person,
-            size: 100,
-            color: Colors.green,
-          ),
+          Icon(Icons.person, size: 100, color: Colors.green),
           SizedBox(height: 20),
           Text(
             '프로필 화면',
@@ -137,10 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: 10),
           Text(
             '사용자 프로필이 여기에 들어갑니다.',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black54,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.black54),
           ),
         ],
       ),
