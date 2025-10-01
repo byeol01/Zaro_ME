@@ -1,5 +1,6 @@
 class EcoActivity {
   final String id;
+  final String userId;
   final String type;
   final String title;
   final int count;
@@ -7,6 +8,7 @@ class EcoActivity {
 
   EcoActivity({
     required this.id,
+    required this.userId,
     required this.type,
     required this.title,
     required this.count,
@@ -15,6 +17,7 @@ class EcoActivity {
 
   EcoActivity copyWith({
     String? id,
+    String? userId,
     String? type,
     String? title,
     int? count,
@@ -22,6 +25,7 @@ class EcoActivity {
   }) {
     return EcoActivity(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       type: type ?? this.type,
       title: title ?? this.title,
       count: count ?? this.count,
@@ -32,6 +36,7 @@ class EcoActivity {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userId': userId,
       'type': type,
       'title': title,
       'count': count,
@@ -42,6 +47,7 @@ class EcoActivity {
   factory EcoActivity.fromJson(Map<String, dynamic> json) {
     return EcoActivity(
       id: json['id'],
+      userId: json['userId'],
       type: json['type'],
       title: json['title'],
       count: json['count'],

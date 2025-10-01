@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/eco_activity.dart';
 
 class ActivityAuthPage extends StatefulWidget {
@@ -58,7 +60,6 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            
             Container(
               width: 120,
               height: 120,
@@ -76,9 +77,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                 color: const Color(0xFF2E7D32),
               ),
             ),
-            
             const SizedBox(height: 30),
-            
             Text(
               widget.activityTitle,
               style: const TextStyle(
@@ -87,9 +86,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                 color: Color(0xFF2E7D32),
               ),
             ),
-            
             const SizedBox(height: 40),
-            
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -154,9 +151,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                 ],
               ),
             ),
-            
             const SizedBox(height: 30),
-            
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -193,16 +188,17 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
-                        borderSide: BorderSide(color: Color(0xFF2E7D32), width: 2),
+                        borderSide: BorderSide(
+                          color: Color(0xFF2E7D32),
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            
             const Spacer(),
-            
             SizedBox(
               width: double.infinity,
               height: 56,
@@ -217,14 +213,10 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                 ),
                 child: const Text(
                   '기록하기',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            
             const SizedBox(height: 20),
           ],
         ),
@@ -247,16 +239,42 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
     }
   }
 
-  void _saveActivity() {
+  void _saveActivity() async {
+    final User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다.')));
+      }
+      return;
+    }
+
+    final collection = FirebaseFirestore.instance.collection('activities');
+    final docId = collection.doc().id;
+
     final activity = EcoActivity(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: docId,
+      userId: user.uid,
       type: widget.activityType,
       title: widget.activityTitle,
       count: _count,
       createdAt: DateTime.now(),
     );
 
-    Navigator.pop(context, activity);
+    try {
+      await collection.doc(docId).set(activity.toJson());
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('저장에 실패했습니다: $e')));
+      }
+    }
   }
 
   @override
