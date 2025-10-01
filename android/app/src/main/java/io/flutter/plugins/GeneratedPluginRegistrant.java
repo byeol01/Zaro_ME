@@ -46,6 +46,11 @@ public final class GeneratedPluginRegistrant {
       Log.e(TAG, "Error registering plugin kakao_flutter_sdk_common, com.kakao.sdk.flutter.KakaoFlutterSdkPlugin", e);
     }
     try {
+      flutterEngine.getPlugins().add(new net.lagerstroemia.naver_login_sdk.NaverLoginSdkPlugin());
+    } catch (Exception e) {
+      Log.e(TAG, "Error registering plugin naver_login_sdk, net.lagerstroemia.naver_login_sdk.NaverLoginSdkPlugin", e);
+    }
+    try {
       flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
     } catch (Exception e) {
       Log.e(TAG, "Error registering plugin shared_preferences_android, io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin", e);

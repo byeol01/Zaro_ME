@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
+import 'package:naver_login_sdk/naver_login_sdk.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'screens/login_scr.dart';
@@ -34,6 +35,16 @@ void main() async {
     }
   } catch (e) {
     print("Warning: Failed to initialize Kakao SDK: $e");
+  }
+
+  try {
+    await NaverLoginSDK.initialize(
+      clientId: dotenv.env['NAVER_CLIENT_ID'] ?? '',
+      clientSecret: dotenv.env['NAVER_CLIENT_SECRET'] ?? '',
+      clientName: dotenv.env['NAVER_APP_NAME'] ?? '',
+    );
+  } catch (e) {
+    print("Warning: Failed to initialize NaverLoginSDK: $e");
   }
 
   try {

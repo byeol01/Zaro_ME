@@ -75,10 +75,24 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _signInWithNaver() async {
+    final userCredential = await _authService.signInWithNaver();
+    if (!mounted) return;
+    if (userCredential != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('네이버 로그인에 실패했습니다. 다시 시도해주세요.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-
     final horizontalPadding = 24.0;
     final logoSize = 0.5;
 
@@ -219,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     InkWell(
-                      onTap: () {},
+                      onTap: _signInWithNaver,
                       child: Image.asset('assets/images/naver.png', width: 48),
                     ),
                     const SizedBox(width: 20),
