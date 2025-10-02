@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../components/header.dart';
 import '../components/bottom_nav.dart';
 import 'my_scr.dart';
 import 'home_sec1.dart';
+import 'map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final User user;
@@ -18,11 +18,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   int _userLevel = 1;
-
-  static const CameraPosition _seoulCityHall = CameraPosition(
-    target: LatLng(37.5665, 126.9780),
-    zoom: 15.0,
-  );
 
   void _onTabTapped(int index) {
     setState(() {
@@ -70,19 +65,12 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return HomeSec1(user: user);
       case 1:
-        return _buildSearchContent();
+        return const MapScreen();
       case 2:
         return _buildProfileContent();
       default:
         return HomeSec1(user: user);
     }
-  }
-
-  Widget _buildSearchContent() {
-    return const GoogleMap(
-      mapType: MapType.normal,
-      initialCameraPosition: _seoulCityHall,
-    );
   }
 
   Widget _buildProfileContent() {
