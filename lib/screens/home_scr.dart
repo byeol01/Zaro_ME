@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../components/header.dart';
 import '../components/bottom_nav.dart';
 import 'my_scr.dart';
 import 'home_sec1.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User user;
+
+  const HomeScreen({super.key, required this.user});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -54,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onProfileTap: _navigateToMyPage,
         onLogoTap: _navigateToHome,
       ),
-      body: _getBody(),
+      body: _getBody(widget.user),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
@@ -62,21 +65,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(User user) {
     switch (_currentIndex) {
       case 0:
-        return _buildHomeContent();
+        return HomeSec1(user: user);
       case 1:
         return _buildSearchContent();
       case 2:
         return _buildProfileContent();
       default:
-        return _buildHomeContent();
+        return HomeSec1(user: user);
     }
-  }
-
-  Widget _buildHomeContent() {
-    return const SingleChildScrollView(child: Column(children: [HomeSec1()]));
   }
 
   Widget _buildSearchContent() {

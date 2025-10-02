@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zaro_me_app/services/auth_service.dart';
 import 'home_scr.dart';
 import 'signup_scr.dart';
@@ -14,7 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
-  void _handleLoginSuccess(String loginMethod) {
+
+  void _handleLoginSuccess(String loginMethod, User user) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -28,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
+      MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
     );
   }
 
@@ -50,8 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
         email,
         password,
       );
-      if (userCredential != null) {
-        _handleLoginSuccess('이메일');
+      if (userCredential?.user != null) {
+        _handleLoginSuccess('이메일', userCredential!.user!);
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -73,8 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       final userCredential = await _authService.signInWithGoogle();
-      if (userCredential != null) {
-        _handleLoginSuccess('구글');
+      if (userCredential?.user != null) {
+        _handleLoginSuccess('구글', userCredential!.user!);
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -96,8 +98,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       final userCredential = await _authService.signInWithKakao();
-      if (userCredential != null) {
-        _handleLoginSuccess('카카오');
+      if (userCredential?.user != null) {
+        _handleLoginSuccess('카카오', userCredential!.user!);
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -119,8 +121,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       final userCredential = await _authService.signInWithNaver();
-      if (userCredential != null) {
-        _handleLoginSuccess('네이버');
+      if (userCredential?.user != null) {
+        _handleLoginSuccess('네이버', userCredential!.user!);
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

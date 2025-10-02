@@ -55,7 +55,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
           ),
         ],
       ),
-      body: Container(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
@@ -198,26 +198,6 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                 ],
               ),
             ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _saveActivity,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E7D32),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: const Text(
-                  '기록하기',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -266,7 +246,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
     try {
       await collection.doc(docId).set(activity.toJson());
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, activity);
       }
     } catch (e) {
       if (mounted) {

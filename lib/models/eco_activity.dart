@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 class EcoActivity {
   final String id;
   final String userId;
@@ -40,7 +43,7 @@ class EcoActivity {
       'type': type,
       'title': title,
       'count': count,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 
@@ -51,7 +54,7 @@ class EcoActivity {
       type: json['type'],
       title: json['title'],
       count: json['count'],
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: (json['createdAt'] as Timestamp).toDate(),
     );
   }
 }
@@ -60,6 +63,8 @@ class EcoActivityData {
   static final EcoActivityData _instance = EcoActivityData._internal();
   factory EcoActivityData() => _instance;
   EcoActivityData._internal();
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final List<EcoActivity> _activities = [];
 
@@ -73,8 +78,30 @@ class EcoActivityData {
     return counts;
   }
 
+  Future<void> loadActivitiesFromFirestore(User user) async {
+    try {
+      final QuerySnapshot snapshot = await _firestore
+          .collection('activities')
+          .where('userId', isEqualTo: user.uid)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final loadedActivities = snapshot.docs
+          .map(
+            (doc) => EcoActivity.fromJson(doc.data() as Map<String, dynamic>),
+          )
+          .toList();
+
+      _activities.clear();
+      _activities.addAll(loadedActivities);
+    } catch (e) {
+      print("Error loading activities from Firestore: $e");
+      clearActivities();
+    }
+  }
+
   void addActivity(EcoActivity activity) {
-    _activities.add(activity);
+    _activities.insert(0, activity);
   }
 
   void removeActivity(String id) {
