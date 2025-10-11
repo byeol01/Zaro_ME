@@ -18,6 +18,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   int _userLevel = 1;
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomeSec1(user: widget.user),
+      const MapScreen(),
+      MyScreen(user: widget.user),
+    ];
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -26,15 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToMyPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MyScreen(userLevel: _userLevel)),
-    ).then((result) {
-      if (result != null && result is int) {
-        setState(() {
-          _userLevel = result;
-        });
-      }
+    setState(() {
+      _currentIndex = 2;
     });
   }
 
@@ -52,48 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
         onProfileTap: _navigateToMyPage,
         onLogoTap: _navigateToHome,
       ),
-      body: _getBody(widget.user),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
-      ),
-    );
-  }
-
-  Widget _getBody(User user) {
-    switch (_currentIndex) {
-      case 0:
-        return HomeSec1(user: user);
-      case 1:
-        return const MapScreen();
-      case 2:
-        return _buildProfileContent();
-      default:
-        return HomeSec1(user: user);
-    }
-  }
-
-  Widget _buildProfileContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.person, size: 100, color: Colors.green),
-          SizedBox(height: 20),
-          Text(
-            '프로필 화면',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            '사용자 프로필이 여기에 들어갑니다.',
-            style: TextStyle(fontSize: 16, color: Colors.black54),
-          ),
-        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/eco_activity.dart';
@@ -20,6 +21,20 @@ class ActivityAuthPage extends StatefulWidget {
 class _ActivityAuthPageState extends State<ActivityAuthPage> {
   int _count = 1;
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _countController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _countController.text = _count.toString();
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    _countController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +134,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                           if (_count > 1) {
                             setState(() {
                               _count--;
+                              _countController.text = _count.toString();
                             });
                           }
                         },
@@ -127,12 +143,32 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                         color: const Color(0xFF2E7D32),
                       ),
                       const SizedBox(width: 20),
-                      Text(
-                        '$_count',
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E7D32),
+                      SizedBox(
+                        width: 80,
+                        child: TextField(
+                          controller: _countController,
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E7D32),
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _count = int.tryParse(value) ?? 1;
+                              if (_count < 1) {
+                                _count = 1;
+                              }
+                            });
+                          },
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
                         ),
                       ),
                       const SizedBox(width: 20),
@@ -140,6 +176,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
                         onPressed: () {
                           setState(() {
                             _count++;
+                            _countController.text = _count.toString();
                           });
                         },
                         icon: const Icon(Icons.add_circle_outline),
@@ -231,6 +268,8 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
       return;
     }
 
+    final finalCount = int.tryParse(_countController.text) ?? 1;
+
     final collection = FirebaseFirestore.instance.collection('activities');
     final docId = collection.doc().id;
 
@@ -239,7 +278,7 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
       userId: user.uid,
       type: widget.activityType,
       title: widget.activityTitle,
-      count: _count,
+      count: finalCount > 0 ? finalCount : 1,
       createdAt: DateTime.now(),
     );
 
@@ -255,11 +294,5 @@ class _ActivityAuthPageState extends State<ActivityAuthPage> {
         ).showSnackBar(SnackBar(content: Text('저장에 실패했습니다: $e')));
       }
     }
-  }
-
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
   }
 }
