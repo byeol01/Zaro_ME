@@ -8,6 +8,8 @@ class EcoActivity {
   final String title;
   final int count;
   final DateTime createdAt;
+  final String? note;
+  final String? imageUrl;
 
   EcoActivity({
     required this.id,
@@ -16,6 +18,8 @@ class EcoActivity {
     required this.title,
     required this.count,
     required this.createdAt,
+    this.note,
+    this.imageUrl,
   });
 
   EcoActivity copyWith({
@@ -25,6 +29,8 @@ class EcoActivity {
     String? title,
     int? count,
     DateTime? createdAt,
+    String? note,
+    String? imageUrl,
   }) {
     return EcoActivity(
       id: id ?? this.id,
@@ -33,6 +39,8 @@ class EcoActivity {
       title: title ?? this.title,
       count: count ?? this.count,
       createdAt: createdAt ?? this.createdAt,
+      note: note ?? this.note,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
@@ -44,6 +52,8 @@ class EcoActivity {
       'title': title,
       'count': count,
       'createdAt': Timestamp.fromDate(createdAt),
+      'note': note,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -55,6 +65,8 @@ class EcoActivity {
       title: json['title'],
       count: json['count'],
       createdAt: (json['createdAt'] as Timestamp).toDate(),
+      note: json['note'] as String?,
+      imageUrl: json['imageUrl'] as String?,
     );
   }
 }

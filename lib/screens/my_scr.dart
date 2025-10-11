@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:zaro_me_app/screens/activity_history_screen.dart';
 import 'package:zaro_me_app/services/auth_service.dart';
 import 'package:zaro_me_app/screens/login_scr.dart';
 
 class MyScreen extends StatefulWidget {
   final User user;
-
   const MyScreen({super.key, required this.user});
 
   @override
@@ -15,38 +15,8 @@ class MyScreen extends StatefulWidget {
 }
 
 class _MyScreenState extends State<MyScreen> {
-  late int currentLevel;
-  late String _currentUserName;
-  late String _currentEmail;
   final AuthService _authService = AuthService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    currentLevel = 1;
-    _loadInitialUserData();
-  }
-
-  void _loadInitialUserData() {
-    _currentUserName = widget.user.displayName ?? '사용자';
-    _currentEmail = widget.user.email ?? '이메일 정보 없음';
-
-    _firestore.collection('users').doc(widget.user.uid).get().then((doc) {
-      if (mounted && doc.exists && doc.data() != null) {
-        setState(() {
-          _currentUserName = doc.data()!['displayName'] ?? _currentUserName;
-          _currentEmail = doc.data()!['email'] ?? _currentEmail;
-        });
-      }
-    });
-  }
-
-  void _updateLevel(int newLevel) {
-    setState(() {
-      currentLevel = newLevel;
-    });
-  }
 
   void _signOut() async {
     await _authService.signOut();
@@ -63,9 +33,12 @@ class _MyScreenState extends State<MyScreen> {
     return DateFormat('yyyy.MM.dd').format(date);
   }
 
-  Future<void> _showEditProfileDialog() async {
-    final nameController = TextEditingController(text: _currentUserName);
-    final emailController = TextEditingController(text: _currentEmail);
+  Future<void> _showEditProfileDialog(
+    String currentName,
+    String currentEmail,
+  ) async {
+    final nameController = TextEditingController(text: currentName);
+    final emailController = TextEditingController(text: currentEmail);
 
     return showDialog<void>(
       context: context,
@@ -89,37 +62,23 @@ class _MyScreenState extends State<MyScreen> {
           actions: <Widget>[
             TextButton(
               child: const Text('취소'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
               child: const Text('저장'),
               onPressed: () async {
                 final newName = nameController.text;
                 final newEmail = emailController.text;
-
-                if (newName.isEmpty || newEmail.isEmpty) {
-                  return;
-                }
-
+                if (newName.isEmpty || newEmail.isEmpty) return;
                 try {
                   await widget.user.updateDisplayName(newName);
                   await _firestore.collection('users').doc(widget.user.uid).set(
                     {'displayName': newName, 'email': newEmail},
                     SetOptions(merge: true),
                   );
-
-                  setState(() {
-                    _currentUserName = newName;
-                    _currentEmail = newEmail;
-                  });
-
-                  if (mounted) {
-                    Navigator.of(context).pop();
-                  }
+                  if (mounted) Navigator.of(context).pop();
                 } catch (e) {
-                  print("프로필 업데이트 실패: $e");
+                  debugPrint("프로필 업데이트 실패: $e");
                 }
               },
             ),
@@ -131,101 +90,187 @@ class _MyScreenState extends State<MyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final creationDate = widget.user.metadata.creationTime;
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: _firestore.collection('users').doc(widget.user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('오류가 발생했습니다: ${snapshot.error}'));
+        }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 20),
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.green, width: 3),
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/lv_$currentLevel.png',
-                fit: BoxFit.cover,
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return _buildProfileUI(
+            userName: widget.user.displayName ?? '사용자',
+            email: widget.user.email ?? '이메일 정보 없음',
+            level: 1,
+            totalPoints: 0,
+            trashCount: 0,
+            foodGrams: 0,
+            transportCount: 0,
+            recycleCount: 0,
+          );
+        }
+
+        final data = snapshot.data!.data()!;
+        final totalPoints = data['totalPoints'] ?? 0;
+        final userName =
+            data['displayName'] ?? widget.user.displayName ?? '사용자';
+        final email = data['email'] ?? widget.user.email ?? '이메일 정보 없음';
+        final level = (totalPoints / 500).floor() + 1;
+        final trashCount = data['trash_count'] ?? 0;
+        final foodGrams = data['food_grams'] ?? 0;
+        final transportCount = data['transport_count'] ?? 0;
+        final recycleCount = data['recycle_count'] ?? 0;
+
+        return _buildProfileUI(
+          userName: userName,
+          email: email,
+          level: level,
+          totalPoints: totalPoints,
+          trashCount: trashCount,
+          foodGrams: foodGrams,
+          transportCount: transportCount,
+          recycleCount: recycleCount,
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileUI({
+    required String userName,
+    required String email,
+    required int level,
+    required int totalPoints,
+    required int trashCount,
+    required int foodGrams,
+    required int transportCount,
+    required int recycleCount,
+  }) {
+    final creationDate = widget.user.metadata.creationTime;
+    return Scaffold(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.green, width: 3),
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'Level $currentLevel',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '환경 기여도 레벨',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-          ),
-          const SizedBox(height: 40),
-          _buildInfoCard('개인정보', [
-            '이름: $_currentUserName',
-            '이메일: $_currentEmail',
-            '가입일: ${_formatDate(creationDate)}',
-          ]),
-          const SizedBox(height: 20),
-          _buildInfoCard('환경 기여 통계', [
-            '총 기여 포인트: ${currentLevel * 100}',
-            '리사이클링 횟수: ${currentLevel * 5}',
-            '탄소 절약량: ${currentLevel * 2.5}kg',
-          ]),
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: _signOut,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[600],
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-            ),
-            child: const Text('로그아웃'),
-          ),
-          const SizedBox(height: 40),
-          const Text(
-            '레벨 테스트 (개발용)',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            alignment: WrapAlignment.center,
-            children: List.generate(8, (index) {
-              int level = index + 1;
-              return ElevatedButton(
-                onPressed: () => _updateLevel(level),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: currentLevel == level
-                      ? Colors.green
-                      : Colors.grey[300],
-                  foregroundColor: currentLevel == level
-                      ? Colors.white
-                      : Colors.black,
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/lv_$level.png',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Image.asset('assets/images/lv_1.png', fit: BoxFit.cover),
                 ),
-                child: Text('Lv.$level'),
-              );
-            }),
-          ),
-        ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Level $level',
+              style: const TextStyle(
+                fontSize: 34,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(height: 10),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 24),
+                children: [
+                  TextSpan(
+                    text: '총 기여 포인트: ',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  TextSpan(
+                    text: '$totalPoints',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 40),
+            _buildInfoCard('개인정보', [
+              '이름: $userName',
+              '이메일: $email',
+              '가입일: ${_formatDate(creationDate)}',
+            ], () => _showEditProfileDialog(userName, email)),
+            const SizedBox(height: 20),
+            _buildInfoCard('환경 기여 통계', [
+              '쓰레기 줄이기: ${trashCount}회',
+              '줄인 잔반량: ${foodGrams}g',
+              '대중교통 이용: ${transportCount}회',
+              '분리수거: ${recycleCount}회',
+            ]),
+            const SizedBox(height: 40),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ActivityHistoryScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                  child: const Text('내 기록 보기'),
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: _signOut,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[600],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                    ),
+                  ),
+                  child: const Text('로그아웃'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildInfoCard(String title, List<String> items) {
+  Widget _buildInfoCard(
+    String title,
+    List<String> items, [
+    VoidCallback? onEditPressed,
+  ]) {
     return Card(
       elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SizedBox(
         width: double.infinity,
         child: Padding(
@@ -244,10 +289,14 @@ class _MyScreenState extends State<MyScreen> {
                       color: Colors.green,
                     ),
                   ),
-                  if (title == '개인정보')
+                  if (onEditPressed != null)
                     IconButton(
-                      icon: const Icon(Icons.edit, size: 20),
-                      onPressed: _showEditProfileDialog,
+                      icon: const Icon(
+                        Icons.edit,
+                        size: 20,
+                        color: Colors.green,
+                      ),
+                      onPressed: onEditPressed,
                     ),
                 ],
               ),
