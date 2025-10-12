@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -43,6 +45,11 @@ class _MapScreenState extends State<MapScreen> {
   BitmapDescriptor? _myLocationIcon;
   final Set<Marker> _myLocationMarker = {};
   bool _isIconLoaded = false;
+
+  LatLng? _startCoords;
+  LatLng? _endCoords;
+  double? _totalDistance;
+  int? _totalTime;
 
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(37.5665, 126.9780),
@@ -124,6 +131,51 @@ class _MapScreenState extends State<MapScreen> {
 
   void _toggleNavigation() async {
     if (_positionStreamSubscription == null) {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null &&
+          _startCoords != null &&
+          _endCoords != null &&
+          _totalDistance != null &&
+          _totalTime != null &&
+          _lastSearchedGeoJson != null) {
+        final historyData = {
+          'userId': user.uid,
+          'originName': _startAddressController.text,
+          'originCoords': GeoPoint(
+            _startCoords!.latitude,
+            _startCoords!.longitude,
+          ),
+          'destinationName': _endAddressController.text,
+          'destinationCoords': GeoPoint(
+            _endCoords!.latitude,
+            _endCoords!.longitude,
+          ),
+          'distance': _totalDistance,
+          'duration': _totalTime,
+          'transportMode': 'auto',
+          'createdAt': FieldValue.serverTimestamp(),
+          'geoJson': _lastSearchedGeoJson,
+        };
+
+        try {
+          await FirebaseFirestore.instance
+              .collection('navigation_history')
+              .add(historyData);
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('경로가 내 기록에 저장되었습니다.')));
+          }
+        } catch (e) {
+          debugPrint('경로 저장 실패: $e');
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('경로 저장에 실패했습니다.')));
+          }
+        }
+      }
+
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled && mounted) {
         ScaffoldMessenger.of(
@@ -392,6 +444,23 @@ class _MapScreenState extends State<MapScreen> {
     return null;
   }
 
+  void _parseRouteSummary(String geoJsonData) {
+    final Map<String, dynamic> decodedJson = jsonDecode(geoJsonData);
+    final features = decodedJson['features'];
+    final startNode = features.firstWhere(
+      (f) => f['id'] == 'start_node',
+      orElse: () => null,
+    );
+
+    if (startNode == null) return;
+
+    final properties = startNode['properties'];
+    setState(() {
+      _totalDistance = (properties['totalDistance'] ?? 0.0).toDouble();
+      _totalTime = properties['totalTime'] ?? 0;
+    });
+  }
+
   void _parseGeoJsonAndDraw(String geoJsonData) {
     _lastSearchedGeoJson = geoJsonData;
     _polylines.clear();
@@ -402,6 +471,8 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _currentInstruction = "경로를 검색해주세요.";
     });
+
+    _parseRouteSummary(geoJsonData);
 
     final Map<String, dynamic> decodedJson = jsonDecode(geoJsonData);
     final List<dynamic> features = decodedJson['features'];
@@ -589,6 +660,10 @@ class _MapScreenState extends State<MapScreen> {
       ]);
       final startCoords = results[0];
       final endCoords = results[1];
+
+      _startCoords = startCoords;
+      _endCoords = endCoords;
+
       if (startCoords == null || endCoords == null) {
         throw Exception('주소를 좌표로 변환하는데 실패했습니다. 주소를 확인해주세요.');
       }

@@ -15,7 +15,7 @@ class ActivityHistoryScreen extends StatelessWidget {
     final snapshot = await FirebaseFirestore.instance
         .collection('activities')
         .where('userId', isEqualTo: user.uid)
-        .orderBy('createdAt', descending: false)
+        .orderBy('createdAt', descending: true)
         .get();
 
     return snapshot.docs
