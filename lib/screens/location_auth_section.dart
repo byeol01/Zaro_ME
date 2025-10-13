@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 
 class LocationAuthSection extends StatefulWidget {
   const LocationAuthSection({super.key});
@@ -9,71 +8,9 @@ class LocationAuthSection extends StatefulWidget {
 }
 
 class _LocationAuthSectionState extends State<LocationAuthSection> {
-  String _locationText = "지역인증을 해주세요!";
   bool _isLocationAuthenticated = false;
   String _localRanking = "";
   String _contribution = "";
-
-  void _authenticateLocation() async {
-    try {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('위치 권한이 필요합니다')));
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('위치 권한이 영구적으로 거부되었습니다')));
-        return;
-      }
-
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      String location = _getLocationFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      setState(() {
-        _isLocationAuthenticated = true;
-        _locationText = "지역인증 완료!";
-        _localRanking = location;
-        _contribution = "상위 12%";
-      });
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('위치를 가져올 수 없습니다: $e')));
-    }
-  }
-
-  String _getLocationFromCoordinates(double lat, double lng) {
-    if (lat >= 37.4 && lat <= 37.6 && lng >= 126.8 && lng <= 127.0) {
-      return "금천구";
-    } else if (lat >= 37.5 && lat <= 37.6 && lng >= 127.0 && lng <= 127.1) {
-      return "강남구";
-    } else if (lat >= 37.5 && lat <= 37.6 && lng >= 126.9 && lng <= 127.0) {
-      return "서초구";
-    } else if (lat >= 37.6 && lat <= 37.7 && lng >= 126.9 && lng <= 127.1) {
-      return "성북구";
-    } else if (lat >= 37.4 && lat <= 37.5 && lng >= 126.9 && lng <= 127.0) {
-      return "영등포구";
-    } else {
-      return "서울시";
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,39 +18,6 @@ class _LocationAuthSectionState extends State<LocationAuthSection> {
       height: 320,
       child: Stack(
         children: [
-          if (!_isLocationAuthenticated)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    _locationText,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF2E7D32),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           if (_isLocationAuthenticated)
             Positioned(
               top: 20,
@@ -136,7 +40,7 @@ class _LocationAuthSectionState extends State<LocationAuthSection> {
             right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: _authenticateLocation,
+                onTap: null,
                 child: Image.asset(
                   'assets/images/zarome.png',
                   width: 250,
