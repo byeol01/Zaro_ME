@@ -43,6 +43,15 @@ dependencies:
   google_sign_in: ^6.2.1
   kakao_flutter_sdk_user: ^1.9.1+2
   flutter_dotenv: ^5.1.0
+  http: ^1.1.0
+  naver_login_sdk: ^3.0.2
+  google_maps_flutter: ^2.6.1
+  cloud_firestore: ^4.17.3
+  intl: ^0.19.0
+  flutter_compass: ^0.8.0
+  visibility_detector: ^0.4.0+2
+  image_picker: ^1.1.2
+  firebase_storage: ^11.7.5
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +79,7 @@ flutter:
   assets:
     - assets/images/
     - .env
+    - assets/data/trash_cans_seoul.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

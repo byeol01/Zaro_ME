@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../components/header.dart';
 import '../components/bottom_nav.dart';
 import 'my_scr.dart';
 import 'home_sec1.dart';
+import 'map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User user;
+
+  const HomeScreen({super.key, required this.user});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,6 +18,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   int _userLevel = 1;
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomeSec1(user: widget.user),
+      const MapScreen(),
+      MyScreen(user: widget.user),
+    ];
+  }
 
   void _onTabTapped(int index) {
     setState(() {
@@ -22,19 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToMyPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MyScreen(
-          userLevel: _userLevel,
-        ),
-      ),
-    ).then((result) {
-      if (result != null && result is int) {
-        setState(() {
-          _userLevel = result;
-        });
-      }
+    setState(() {
+      _currentIndex = 2;
     });
   }
 
@@ -52,97 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
         onProfileTap: _navigateToMyPage,
         onLogoTap: _navigateToHome,
       ),
-      body: _getBody(),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
-      ),
-    );
-  }
-
-  Widget _getBody() {
-    switch (_currentIndex) {
-      case 0:
-        return _buildHomeContent();
-      case 1:
-        return _buildSearchContent();
-      case 2:
-        return _buildProfileContent();
-      default:
-        return _buildHomeContent();
-    }
-  }
-
-  Widget _buildHomeContent() {
-    return const SingleChildScrollView(
-      child: Column(
-        children: [
-          HomeSec1(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search,
-            size: 100,
-            color: Colors.green,
-          ),
-          SizedBox(height: 20),
-          Text(
-            '검색 화면',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            '검색 기능이 여기에 들어갑니다.',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black54,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileContent() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.person,
-            size: 100,
-            color: Colors.green,
-          ),
-          SizedBox(height: 20),
-          Text(
-            '프로필 화면',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            '사용자 프로필이 여기에 들어갑니다.',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black54,
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -36,6 +36,7 @@ android {
         versionName = flutter.versionName
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = dotEnv.getProperty("KAKAO_NATIVE_APP_KEY", "")
+        manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = dotEnv.getProperty("GOOGLE_MAPS_API_KEY", "")
     }
 
     buildTypes {
